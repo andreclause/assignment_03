@@ -63,24 +63,27 @@ if process_clicked and uploaded_file:
     lines = text.split("\n")
 
     packages = []
-    for line in lines:
-        line = line.strip()
-        if not line:
-            continue
+    try:
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
 
-        package = parse_packaging(line)
-        packages.append(package)
+            package = parse_packaging(line)
+            packages.append(package)
+    except ValueError as error:
+        st.error(f"Could not parse package description {line!r}: {error}")
+    else:
+        json_name = uploaded_file.name.replace(".txt", ".json")
+        json_path = f"data/{json_name}"
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(packages, f)
 
-    json_name = uploaded_file.name.replace(".txt", ".json")
-    json_path = f"data/{json_name}"
-    with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(packages, f)
-
-    st.session_state.files_processed += 1
-    st.session_state.packages_processed += len(packages)
-    st.session_state.summaries.append(
-        f"{len(packages)} packages written to {json_path}"
-    )
+        st.session_state.files_processed += 1
+        st.session_state.packages_processed += len(packages)
+        st.session_state.summaries.append(
+            f"{len(packages)} packages written to {json_path}"
+        )
 
 # display from state
 col1, col2 = st.columns(2)

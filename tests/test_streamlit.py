@@ -93,6 +93,16 @@ def test_one_package_shows_each_level_and_the_total():
     assert "36 eggs" in text, "the total should be 36 eggs (12 * 3 * 1)"
 
 
+def test_one_package_shows_a_friendly_error_for_invalid_input():
+    app = load_app(ONE_PACKAGE)
+    widget(app.text_input, "package_data", "text_input").set_value("not a valid package")
+    app.run()
+    no_exception(app, ONE_PACKAGE)
+
+    assert "Could not parse package description" in page_text(app)
+    assert "Total" not in page_text(app)
+
+
 def test_one_package_recomputes_for_new_input():
     """A new description gives a new answer — the page is computed, not typed in."""
     app = load_app(ONE_PACKAGE)
@@ -141,6 +151,16 @@ def test_process_file_reports_every_line_and_writes_json():
     assert "3 packages written to data/packaging1.json" in text
 
     assert read_json("packaging1.json") == PACKAGING1_JSON
+
+
+def test_process_file_rejects_invalid_input_without_writing_json():
+    app = load_app(PROCESS_FILE)
+    upload(app, "invalid.txt", "valid package line\nnot a valid package\n")
+    app.run()
+    no_exception(app, PROCESS_FILE)
+
+    assert "Could not parse package description" in page_text(app)
+    assert not os.path.exists(os.path.join("data", "invalid.json"))
 
 
 def test_process_file_handles_a_file_it_has_never_seen():
@@ -198,6 +218,18 @@ def test_process_files_waits_for_the_button():
     assert counts(app) == ("0", "0")
     assert "written" not in page_text(app)
     assert not os.path.exists(os.path.join("data", "packaging1.json"))
+
+
+def test_process_files_rejects_invalid_input_without_counting_it():
+    app = load_app(PROCESS_FILES)
+    upload(app, "invalid.txt", "not a valid package")
+    widget(app.button, "process", "button").click()
+    app.run()
+    no_exception(app, PROCESS_FILES)
+
+    assert "Could not parse package description" in page_text(app)
+    assert counts(app) == ("0", "0")
+    assert not os.path.exists(os.path.join("data", "invalid.json"))
 
 
 def test_process_files_accumulates_across_uploads():

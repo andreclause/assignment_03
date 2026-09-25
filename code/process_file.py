@@ -27,21 +27,27 @@ if uploaded_file:
     lines = text.split("\n")
 
     packages = []
-    for line in lines:
-        line = line.strip()
-        if not line:
-            continue
- 
-        package = parse_packaging(line)
-        packages.append(package)
+    results = []
+    try:
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
 
-        total = calc_total_units(package)
-        unit = get_unit(package)
-        st.info(f"{line} ➡️ Total 📦 Size: {total} {unit}")
+            package = parse_packaging(line)
+            packages.append(package)
+            total = calc_total_units(package)
+            unit = get_unit(package)
+            results.append(f"{line} ➡️ Total 📦 Size: {total} {unit}")
+    except ValueError as error:
+        st.error(f"Could not parse package description {line!r}: {error}")
+    else:
+        for result in results:
+            st.info(result)
 
-    json_name = uploaded_file.name.replace(".txt", ".json")
-    json_path = f"data/{json_name}"
-    with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(packages, f)
+        json_name = uploaded_file.name.replace(".txt", ".json")
+        json_path = f"data/{json_name}"
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(packages, f)
 
-    st.success(f"{len(packages)} packages written to {json_path}")
+        st.success(f"{len(packages)} packages written to {json_path}")
