@@ -1,9 +1,3 @@
-The part I struggled with most was the "update on click" step in process_files.py. 
-I initially assumed that if a file was uploaded, I should process it right away — 
-but Streamlit reruns the entire script from the top on every interaction, and the uploader 
-keeps returning the same file on every rerun even after it's been processed once. That meant gating the actual 
-work behind st.button("Process") was necessary, not optional — the button's return value is only True on the 
-one rerun triggered by the click, and False on every rerun after that. What confused me was that this felt 
-backwards at first: I kept wanting to check "is there a file" instead of "was the button just clicked." Next 
-time I hit this pattern, I want to trace through a few reruns by hand (or add print statements) so I can actually 
-watch when process_clicked is True vs False, instead of just trusting that the code works.
+I learned that Streamlit reruns an app from top to bottom after every interaction, so ordinary variables are reset. Values that must persist, such as the processed-file and package counts, belong in `st.session_state`. I also learned that an uploaded file remains selected across reruns, so processing must be gated by the `st.button("Process")` return value; otherwise, the same file can be counted more than once. Keeping parsing in `packaging_parser` and writing the parsed package data with `json.dump` kept the app's responsibilities clear.
+
+The part I found confusing was distinguishing "a file is selected" from "the user just clicked Process." The file uploader can keep returning the same file, while the button is true only on the rerun caused by that click. To practice this pattern, I will trace a sequence of upload, click, and unrelated reruns, recording when the button value changes and verifying that session-state counts change only once per click.
