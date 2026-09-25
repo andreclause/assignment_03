@@ -1,6 +1,9 @@
-Write your reflection here.
-
-See reflection.md for what makes a good reflection — be specific, use the
-terminology from this assignment (rerun, widget, return value, guard, bytes vs.
-text, decode, session state, initialise once, button-triggered, metric), and make
-it actionable.
+The part I struggled with most was the "update on click" step in process_files.py. 
+I initially assumed that if a file was uploaded, I should process it right away — 
+but Streamlit reruns the entire script from the top on every interaction, and the uploader 
+keeps returning the same file on every rerun even after it's been processed once. That meant gating the actual 
+work behind st.button("Process") was necessary, not optional — the button's return value is only True on the 
+one rerun triggered by the click, and False on every rerun after that. What confused me was that this felt 
+backwards at first: I kept wanting to check "is there a file" instead of "was the button just clicked." Next 
+time I hit this pattern, I want to trace through a few reruns by hand (or add print statements) so I can actually 
+watch when process_clicked is True vs False, instead of just trusting that the code works.
